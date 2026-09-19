@@ -1,0 +1,286 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 30px 15px;
+}
+
+
+.app {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+
+/* HEADER */
+
+.app-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+
+.app-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+
+.app-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+
+/* TOOLBAR */
+
+.toolbar {
+    background: white;
+
+    padding: 18px;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+    align-items: center;
+
+    gap: 25px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 20px;
+}
+
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.tool-group label {
+    font-weight: bold;
+}
+
+
+#colorPicker {
+    width: 45px;
+    height: 40px;
+
+    border: none;
+
+    padding: 0;
+
+    cursor: pointer;
+
+    background: transparent;
+}
+
+
+/* BRUSH SIZE */
+
+.size-control {
+    flex: 1;
+    min-width: 200px;
+}
+
+
+#sizePicker {
+    width: 150px;
+    cursor: pointer;
+}
+
+
+#sizeValue {
+    color: #2563eb;
+}
+
+
+/* BUTTONS */
+
+.buttons {
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+
+button {
+    border: none;
+
+    padding: 10px 15px;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 0.95rem;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+button:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+
+#eraseButton {
+    background: #7c3aed;
+}
+
+
+#eraseButton:hover {
+    background: #6d28d9;
+}
+
+
+#clearButton {
+    background: #dc2626;
+}
+
+
+#clearButton:hover {
+    background: #b91c1c;
+}
+
+
+#saveButton {
+    background: #059669;
+}
+
+
+#saveButton:hover {
+    background: #047857;
+}
+
+
+/* CANVAS */
+
+.canvas-container {
+    background: white;
+
+    padding: 15px;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+
+    justify-content: center;
+}
+
+
+#drawingCanvas {
+    background: white;
+
+    border: 2px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    cursor: crosshair;
+
+    max-width: 100%;
+
+    height: auto;
+}
+
+
+/* SAVE MESSAGE */
+
+#saveMessage {
+    text-align: center;
+
+    min-height: 24px;
+
+    margin-top: 15px;
+
+    color: #059669;
+
+    font-weight: bold;
+}
+
+
+/* INSTRUCTIONS */
+
+.instructions {
+    text-align: center;
+
+    color: #64748b;
+
+    margin-top: 10px;
+
+    font-size: 0.9rem;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 650px) {
+
+    body {
+        padding: 20px 10px;
+    }
+
+
+    .app-header h1 {
+        font-size: 2rem;
+    }
+
+
+    .toolbar {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .tool-group {
+        justify-content: space-between;
+    }
+
+
+    .size-control {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    #sizePicker {
+        width: 100%;
+    }
+
+
+    .buttons {
+        justify-content: center;
+    }
+
+
+    button {
+        flex: 1;
+    }
+}

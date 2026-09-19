@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../practice"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "drawing-app"
+	}
+}
