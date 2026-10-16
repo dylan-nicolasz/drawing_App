@@ -1,120 +1,25 @@
-const canvas = document.querySelector(
-    "#drawingCanvas"
-) as HTMLCanvasElement;
 
+const canvas = document.querySelector("#drawingCanvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d");
 
-const appState = {
-    isDrawing: false,
-    isEraser: false,
-    brushSize: 5,
-    brushColor: "black"
-};
-
-class drawingTool {
+// CLASS
+class DrawingTool {
     size: number;
     color: string;
 
-    constructor(size:number, color:string){
+    constructor(size: number, color: string) {
         this.size = size;
         this.color = color;
     }
 }
 
-const brush = new drawingTool (1,"black");
-brush.size;
-brush.color;
+const brush = new DrawingTool(5, "black");
 
-let isEraser : boolean = false;
-
-function toggleEraser(): void {
-    isEraser = !isEraser;
+let isDrawing: boolean = false;
+let isEraser: boolean = false;
 
 
-    if (context) {
-        if (isEraser){
-            context.globalCompositeOperation = "destination-out";
-
-        } else {
-            context.globalCompositeOperation = "source-over";
-        }
-    }
-}
-
-let isDrawing : boolean = false;
-
-console.log("Canvas:", canvas);
-
-canvas.addEventListener("mousedown", (event) => {
-    isDrawing = true;
-
-    if (context) {
-        saveState();
-        isDrawing= true;
-
-        context.strokeStyle = brush.color;
-        context.lineWidth = brush.size;
-
-
-        context?.beginPath();
-        context?.moveTo(event.offsetX, event.offsetY);
-    }
-    
-});
-
-canvas.addEventListener("mousemove", (event) => {
-    if (!isDrawing) {
-        return;
-    }
-
-    context?.lineTo(event.offsetX, event.offsetY);
-    context?.stroke();
-});
-
-
-canvas.addEventListener("mouseup", () => {
-    isDrawing = false;
-});
-
-
-
-// Create the button for the eraser
-const eraseButton = document.querySelector ("#eraseButton");
-
-//DOM
-eraseButton?.addEventListener ("click", () => {
-    toggleEraser();
-});
-
-
-// Function to clear the canvas. clearReact method requires4 values (xPoint, yPoint, widht, height)
-function clearCanvas(): void {
-    context?.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-const clearButton = document.querySelector ("#clearButton");
-
-clearButton?.addEventListener ("click", () => {
-    clearCanvas();
-});
-
-
-// color button, the user picks the color
-const colorPick = document.querySelector ("#colorPicker") as HTMLInputElement;
-
-colorPick.addEventListener ("input", () => {
-    brush.color = colorPick.value;
-});
-
-// brush size, input
-const sizePick = document.querySelector ("#sizePicker") as HTMLInputElement;
-console.log("Size picker:", sizePick);
-
-sizePick.addEventListener ("input", () => {
-    brush.size = Number(sizePick.value);
-});
-
-//Undo
+// LIST
 const historyDrawing: ImageData[] = [];
 
 function saveState(): void {
@@ -130,50 +35,215 @@ function saveState(): void {
     }
 }
 
-function undo (): void {
+
+// DRAWING
+canvas.addEventListener("mousedown", (event) => {
+    if (context) {
+        saveState();
+
+        isDrawing = true;
+
+        context.strokeStyle = brush.color;
+        context.lineWidth = brush.size;
+        context.lineCap = "round";
+        context.lineJoin = "round";
+
+        context.beginPath();
+        context.moveTo(event.offsetX, event.offsetY);
+    }
+});
+
+canvas.addEventListener("mousemove", (event) => {
+    if (!isDrawing) {
+        return;
+    }
+
+    context?.lineTo(event.offsetX, event.offsetY);
+    context?.stroke();
+});
+
+canvas.addEventListener("mouseup", () => {
+    isDrawing = false;
+});
+
+canvas.addEventListener("mouseleave", () => {
+    isDrawing = false;
+});
+
+
+// ERASER
+function toggleEraser(): void {
+    isEraser = !isEraser;
+
+    if (context) {
+        if (isEraser) {
+            context.globalCompositeOperation = "destination-out";
+        } else {
+            context.globalCompositeOperation = "source-over";
+        }
+    }
+}
+
+const eraseButton = document.querySelector("#eraseButton");
+
+eraseButton?.addEventListener("click", () => {
+    toggleEraser();
+
+    eraseButton.textContent = isEraser
+        ? "✏️ Drawing"
+        : "🧹 Eraser";
+});
+
+
+// CLEAR
+function clearCanvas(): void {
+    if (context) {
+        saveState();
+
+        context.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+    }
+}
+
+const clearButton = document.querySelector("#clearButton");
+
+clearButton?.addEventListener("click", () => {
+    clearCanvas();
+});
+
+
+// COLOR PICKER
+const colorPick = document.querySelector(
+    "#colorPicker"
+) as HTMLInputElement;
+
+colorPick.addEventListener("input", () => {
+    brush.color = colorPick.value;
+
+    isEraser = false;
+
+    if (context) {
+        context.globalCompositeOperation = "source-over";
+    }
+
+    if (eraseButton) {
+        eraseButton.textContent = "🧹 Eraser";
+    }
+});
+
+
+// BRUSH SIZE
+const sizePick = document.querySelector(
+    "#sizePicker"
+) as HTMLInputElement;
+
+const sizeValue = document.querySelector(
+    "#sizeValue"
+);
+
+sizePick.addEventListener("input", () => {
+    brush.size = Number(sizePick.value);
+
+    if (sizeValue) {
+        sizeValue.textContent = `${brush.size}px`;
+    }
+});
+
+
+// UNDO
+function undo(): void {
     if (context && historyDrawing.length > 0) {
         const previousState = historyDrawing.pop();
 
-        if (previousState){
-            context.putImageData(previousState, 0 , 0);
+        if (previousState) {
+            context.putImageData(
+                previousState,
+                0,
+                0
+            );
         }
     }
 }
 
 const undoButton = document.querySelector("#undoButton");
 
-undoButton?. addEventListener("click", () => {
+undoButton?.addEventListener("click", () => {
     undo();
-})
+});
 
-// async/await function
 
-function saveDrawing() : Promise<string> {
-    return new Promise ((resolve) => {
+// RECURSION
+function countdown(number: number): void {
+    console.log(`Saving in ${number}...`);
+
+    if (number <= 1) {
+        return;
+    }
+
+    countdown(number - 1);
+}
+
+
+// ASYNCHRONOUS FUNCTION
+function saveDrawing(): Promise<string> {
+    return new Promise((resolve) => {
         setTimeout(() => {
-            resolve (
-                "Drawing saved succedfully"
-            );
+            resolve("Drawing saved successfully!");
         }, 1000);
     });
 }
 
-async function handleSave (): Promise<void> {
-    const message = await saveDrawing();
 
-    const saveMessage = document.querySelector (
+// ASYNC/AWAIT + EXCEPTION HANDLING
+async function handleSave(): Promise<void> {
+    const saveMessage = document.querySelector(
         "#saveMessage"
     ) as HTMLParagraphElement;
 
-    saveMessage.textContent = message;
+    try {
+        if (!context) {
+            throw new Error(
+                "Canvas context is not available."
+            );
+        }
 
-    setTimeout (() => {
-        saveMessage.textContent ="";
+        countdown(3);
+
+        const message = await saveDrawing();
+
+        console.log(message);
+
+        if (saveMessage) {
+            saveMessage.textContent = message;
+        }
+
+    } catch (error) {
+        console.error(
+            "Error saving drawing:",
+            error
+        );
+
+        if (saveMessage) {
+            saveMessage.textContent =
+                "Error saving the drawing.";
+        }
+    }
+
+    setTimeout(() => {
+        if (saveMessage) {
+            saveMessage.textContent = "";
+        }
     }, 2500);
 }
 
+
+// SAVE BUTTON
 const saveButton = document.querySelector("#saveButton");
 
 saveButton?.addEventListener("click", () => {
     handleSave();
-})
+});

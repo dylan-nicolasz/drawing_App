@@ -1,13 +1,8 @@
 "use strict";
 const canvas = document.querySelector("#drawingCanvas");
 const context = canvas.getContext("2d");
-const appState = {
-    isDrawing: false,
-    isEraser: false,
-    brushSize: 5,
-    brushColor: "black"
-};
-class drawingTool {
+// CLASS
+class DrawingTool {
     size;
     color;
     constructor(size, color) {
@@ -15,32 +10,28 @@ class drawingTool {
         this.color = color;
     }
 }
-const brush = new drawingTool(1, "black");
-brush.size;
-brush.color;
+const brush = new DrawingTool(5, "black");
+let isDrawing = false;
 let isEraser = false;
-function toggleEraser() {
-    isEraser = !isEraser;
+// LIST
+const historyDrawing = [];
+function saveState() {
     if (context) {
-        if (isEraser) {
-            context.globalCompositeOperation = "destination-out";
-        }
-        else {
-            context.globalCompositeOperation = "source-over";
-        }
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        historyDrawing.push(imageData);
     }
 }
-let isDrawing = false;
-console.log("Canvas:", canvas);
+// DRAWING
 canvas.addEventListener("mousedown", (event) => {
-    isDrawing = true;
     if (context) {
         saveState();
         isDrawing = true;
         context.strokeStyle = brush.color;
         context.lineWidth = brush.size;
-        context?.beginPath();
-        context?.moveTo(event.offsetX, event.offsetY);
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.beginPath();
+        context.moveTo(event.offsetX, event.offsetY);
     }
 });
 canvas.addEventListener("mousemove", (event) => {
@@ -53,39 +44,61 @@ canvas.addEventListener("mousemove", (event) => {
 canvas.addEventListener("mouseup", () => {
     isDrawing = false;
 });
-// Create the button for the eraser
+canvas.addEventListener("mouseleave", () => {
+    isDrawing = false;
+});
+// ERASER
+function toggleEraser() {
+    isEraser = !isEraser;
+    if (context) {
+        if (isEraser) {
+            context.globalCompositeOperation = "destination-out";
+        }
+        else {
+            context.globalCompositeOperation = "source-over";
+        }
+    }
+}
 const eraseButton = document.querySelector("#eraseButton");
-//DOM
 eraseButton?.addEventListener("click", () => {
     toggleEraser();
+    eraseButton.textContent = isEraser
+        ? "✏️ Drawing"
+        : "🧹 Eraser";
 });
-// Function to clear the canvas. clearReact method requires4 values (xPoint, yPoint, widht, height)
+// CLEAR
 function clearCanvas() {
-    context?.clearRect(0, 0, canvas.width, canvas.height);
+    if (context) {
+        saveState();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }
 const clearButton = document.querySelector("#clearButton");
 clearButton?.addEventListener("click", () => {
     clearCanvas();
 });
-// color button, the user picks the color
+// COLOR PICKER
 const colorPick = document.querySelector("#colorPicker");
 colorPick.addEventListener("input", () => {
     brush.color = colorPick.value;
+    isEraser = false;
+    if (context) {
+        context.globalCompositeOperation = "source-over";
+    }
+    if (eraseButton) {
+        eraseButton.textContent = "🧹 Eraser";
+    }
 });
-// brush size, input
+// BRUSH SIZE
 const sizePick = document.querySelector("#sizePicker");
-console.log("Size picker:", sizePick);
+const sizeValue = document.querySelector("#sizeValue");
 sizePick.addEventListener("input", () => {
     brush.size = Number(sizePick.value);
-});
-//Undo
-const historyDrawing = [];
-function saveState() {
-    if (context) {
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        historyDrawing.push(imageData);
+    if (sizeValue) {
+        sizeValue.textContent = `${brush.size}px`;
     }
-}
+});
+// UNDO
 function undo() {
     if (context && historyDrawing.length > 0) {
         const previousState = historyDrawing.pop();
@@ -98,22 +111,50 @@ const undoButton = document.querySelector("#undoButton");
 undoButton?.addEventListener("click", () => {
     undo();
 });
-// async/await function
+// RECURSION
+function countdown(number) {
+    console.log(`Saving in ${number}...`);
+    if (number <= 1) {
+        return;
+    }
+    countdown(number - 1);
+}
+// ASYNCHRONOUS FUNCTION
 function saveDrawing() {
     return new Promise((resolve) => {
         setTimeout(() => {
-            resolve("Drawing saved succedfully");
+            resolve("Drawing saved successfully!");
         }, 1000);
     });
 }
+// ASYNC/AWAIT + EXCEPTION HANDLING
 async function handleSave() {
-    const message = await saveDrawing();
     const saveMessage = document.querySelector("#saveMessage");
-    saveMessage.textContent = message;
+    try {
+        if (!context) {
+            throw new Error("Canvas context is not available.");
+        }
+        countdown(3);
+        const message = await saveDrawing();
+        console.log(message);
+        if (saveMessage) {
+            saveMessage.textContent = message;
+        }
+    }
+    catch (error) {
+        console.error("Error saving drawing:", error);
+        if (saveMessage) {
+            saveMessage.textContent =
+                "Error saving the drawing.";
+        }
+    }
     setTimeout(() => {
-        saveMessage.textContent = "";
+        if (saveMessage) {
+            saveMessage.textContent = "";
+        }
     }, 2500);
 }
+// SAVE BUTTON
 const saveButton = document.querySelector("#saveButton");
 saveButton?.addEventListener("click", () => {
     handleSave();
